@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Финансовый расчёт</title>
+<style>
+:root{
+  --bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:#d2d2d7;--soft:#f0f0f2;
+  --accent:#0071e3;--accent2:#34c759;--warn:#ff9f0a;
+  color-scheme:light;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--muted:#98989d;--line:#38383a;--soft:#2c2c2e;--accent:#2997ff;--accent2:#30d158;color-scheme:dark}
+}
+:root[data-theme="dark"]{--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--muted:#98989d;--line:#38383a;--soft:#2c2c2e;--accent:#2997ff;--accent2:#30d158;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 20px 64px}
+h1{font-size:clamp(30px,6vw,48px);font-weight:700;letter-spacing:-.02em;margin:0 0 28px}
+.sub{color:var(--muted);font-size:clamp(16px,2.4vw,20px);margin:0 0 32px}
+.card{background:var(--card);border-radius:22px;padding:28px}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.field{margin-bottom:26px}
+.field:last-child{margin-bottom:0}
+.lab{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;color:var(--muted);margin-bottom:8px}
+.inp{display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.inp input{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font:inherit;font-size:30px;font-weight:600;letter-spacing:-.01em;outline:none;padding:0}
+.inp span{font-size:18px;color:var(--muted)}
+.inp:focus-within{border-color:var(--accent)}
+input[type=range]{width:100%;margin:14px 0 0;accent-color:var(--accent)}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{flex:1;min-width:44px;border:0;background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:500;padding:8px 6px;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hero{text-align:left}
+.hero .k{color:var(--muted);font-size:15px}
+.hero .v{font-size:clamp(40px,8vw,68px);font-weight:700;letter-spacing:-.03em;line-height:1.05;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.hero .n{color:var(--muted);font-size:14px;min-height:20px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
+@media(max-width:560px){.stats{grid-template-columns:1fr}}
+.stat{background:var(--soft);border-radius:16px;padding:16px}
+.stat .k{color:var(--muted);font-size:13px}
+.stat .v{font-size:22px;font-weight:600;letter-spacing:-.01em;margin-top:4px;font-variant-numeric:tabular-nums}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:24px;background:var(--soft)}
+.bar i{display:block;transition:width .35s ease}
+.legend{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.tbl-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin:36px 4px 12px}
+.tbl-head h2{font-size:26px;margin:0;letter-spacing:-.01em}
+.tbl-head p{margin:0;color:var(--muted);font-size:15px}
+.scroll{overflow:auto;max-height:560px;border-radius:22px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-variant-numeric:tabular-nums;font-size:15px}
+th,td{padding:11px 16px;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{position:sticky;top:0;background:var(--card);color:var(--muted);font-weight:500;font-size:13px;border-bottom:1px solid var(--line);z-index:1}
+tbody tr+tr td{border-top:1px solid var(--soft)}
+tbody tr.yr td{background:var(--soft);font-weight:600;font-size:13px;color:var(--muted);text-align:left}
+tfoot td{position:sticky;bottom:0;background:var(--card);font-weight:700;border-top:1px solid var(--line)}
+.foot{color:var(--muted);font-size:13px;margin:20px 4px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.card h3{margin:0 0 4px;font-size:20px;letter-spacing:-.01em}
+.card .big{font-size:clamp(30px,5vw,42px);font-weight:700;letter-spacing:-.02em;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+.card .note{color:var(--muted);font-size:13px;min-height:18px}
+.stats2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.chart h4{margin:28px 0 8px;font-size:15px;font-weight:600}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-size:11px;font-family:inherit}
+.cmp{margin-top:30px;padding-top:24px;border-top:1px solid var(--line)}
+.cmp h3{margin:0 0 12px;font-size:18px}
+.ct{min-width:0;width:100%;font-size:13px}
+.ct th,.ct td{padding:7px 4px;white-space:normal;text-align:right}
+.ct th:first-child,.ct td:first-child{text-align:left;color:var(--muted)}
+.ct thead th{position:static;background:none;font-size:12px}
+.save{background:var(--soft);border-radius:14px;padding:14px;margin-top:16px}
+.save .k{font-size:12px;color:var(--muted)}
+.save .v{font-size:24px;font-weight:700;color:var(--accent2);letter-spacing:-.01em;margin:2px 0}
+.vd{font-size:13px;color:var(--muted);margin:14px 0 0;line-height:1.5}
+.vd b{color:var(--text)}
+html{-webkit-text-size-adjust:100%}
+button{touch-action:manipulation}
+@media(max-width:600px){
+.wrap{padding:20px 12px 48px}
+.card{padding:20px;border-radius:18px}
+h1{margin-bottom:18px}
+.grid,.grid2{gap:12px}
+.grid2{margin-top:12px}
+.field{margin-bottom:22px}
+.inp input{font-size:26px}
+.seg button{font-size:13px;padding:10px 4px;white-space:normal}
+.stat .v{font-size:20px}
+.chart h4{margin-top:22px}
+.tbl-head{margin:28px 4px 10px}
+.tbl-head h2{font-size:22px}
+.scroll{max-height:70vh;border-radius:18px}
+table{min-width:0;font-size:12px}
+th,td{padding:9px 6px}
+thead th{font-size:11px}
+.scroll tbody td:first-child,.scroll thead th:first-child,.scroll tfoot td:first-child{position:sticky;left:0;background:var(--card)}
+.scroll thead th:first-child{z-index:2}
+.scroll tbody tr.yr td{background:var(--soft)}
+}
+html,body{max-width:100%;overflow-x:hidden}
+.grid>*,.grid2>*,.card{min-width:0}
+.inp input{width:100%;min-width:0}
+@media(max-width:820px){.grid,.grid2{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){
+.hero .v{font-size:clamp(28px,9.5vw,44px)}
+.card .big{font-size:clamp(26px,8vw,36px)}
+.stat .v{overflow-wrap:anywhere}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Финансовый расчёт</h1>
+
+  <div class="grid">
+    <section class="card" aria-label="Параметры кредита">
+      <div class="field">
+        <div class="lab"><label for="amt">Сумма кредита</label></div>
+        <div class="inp"><input id="amt" type="text" inputmode="numeric" autocomplete="off" placeholder="Введите сумму"><span>₸</span></div>
+      </div>
+      <div class="field">
+        <div class="lab"><label for="rate">Годовая ставка</label></div>
+        <div class="inp"><input id="rate" type="text" inputmode="decimal" autocomplete="off" placeholder="Введите ставку"><span>%</span></div>
+      </div>
+      <div class="field">
+        <div class="lab"><label for="yrs">Срок, лет</label><span id="mTxt"></span></div>
+        <div class="inp"><input id="yrs" type="text" inputmode="numeric" autocomplete="off" placeholder="Введите срок"><span>лет</span></div>
+      </div>
+      <div class="field">
+        <div class="lab"><label for="pti">Макс. доля платежа в доходе</label></div>
+        <div class="inp"><input id="pti" type="text" inputmode="decimal" autocomplete="off" placeholder="например, 50"><span>%</span></div>
+      </div>
+      <div class="field">
+        <div class="lab"><label for="inc">Ваш доход в месяц (по желанию)</label></div>
+        <div class="inp"><input id="inc" type="text" inputmode="numeric" autocomplete="off" placeholder="для оценки риска"><span>₸</span></div>
+      </div>
+      <div class="field">
+        <div class="lab">Тип платежа</div>
+        <div class="seg" id="type" role="group" aria-label="Тип платежа">
+          <button data-t="a" aria-pressed="true">Аннуитетный</button>
+          <button data-t="d" aria-pressed="false">Дифференцированный</button>
+        </div>
+      </div>
+      <div class="cmp" id="cmp" style="display:none"></div>
+    </section>
+
+    <section class="card hero" aria-live="polite">
+      <div class="k" id="payK">Ежемесячный платёж</div>
+      <div class="v" id="pay">—</div>
+      <div class="n" id="payN"></div>
+
+      <div class="stats">
+        <div class="stat"><div class="k">Общая сумма выплат</div><div class="v" id="total">—</div></div>
+        <div class="stat"><div class="k">Чистый платёж (переплата)</div><div class="v" id="net">—</div></div>
+        <div class="stat"><div class="k">Доходность банка</div><div class="v" id="ret">—</div></div>
+      </div>
+
+      <div class="bar" aria-hidden="true"><i id="b1" style="background:var(--accent)"></i><i id="b2" style="background:var(--warn)"></i></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--accent)"></span>Основной долг <b id="l1"></b></span>
+        <span><span class="dot" style="background:var(--warn)"></span>Проценты банку <b id="l2"></b></span>
+      </div>
+      <div class="chart" id="w1" style="display:none"><h4>Остаток долга по годам</h4><div id="c1"></div></div>
+      <div class="chart" id="w2" style="display:none"><h4>Основной долг и проценты по годам</h4><div id="c2"></div></div>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section class="card" aria-live="polite">
+      <h3>Необходимый доход</h3>
+      <div class="note">Минимальный месячный доход, при котором платёж не превышает допустимую долю</div>
+      <div class="big" id="req">—</div>
+      <div class="note" id="reqN"></div>
+      <div class="stats2">
+        <div class="stat"><div class="k">Минимальный доход в год</div><div class="v" id="reqY">—</div></div>
+        <div class="stat"><div class="k">Фактическая доля платежа</div><div class="v" id="sh">—</div></div>
+      </div>
+      <div class="note" id="ok" style="margin-top:12px;font-weight:600"></div>
+    </section>
+    <section class="card" aria-live="polite">
+      <h3>Риск дефолта</h3>
+      <div class="note">Оценка по вашему доходу и платежу</div>
+      <div class="big" id="lvl">—</div>
+      <div class="note" id="lvlN"></div>
+      <div class="stats2">
+        <div class="stat"><div class="k">Вероятность дефолта в год</div><div class="v" id="pd">—</div></div>
+        <div class="stat"><div class="k">Вероятность дефолта за срок</div><div class="v" id="pdT">—</div></div>
+        <div class="stat"><div class="k">Ожидаемые потери банка</div><div class="v" id="ecl">—</div></div>
+        <div class="stat"><div class="k">Потери при дефолте (LGD)</div><div class="v">45 %</div></div>
+      </div>
+      <div class="note" style="margin-top:12px">Упрощённая модель: вероятность дефолта растёт вместе с долей платежа в доходе. Вероятность за срок = 1 − (1 − годовая)^лет. Ожидаемые потери = вероятность за срок × LGD × сумма кредита. Это иллюстрация, а не скоринг банка.</div>
+    </section>
+  </div>
+
+  <div class="tbl-head">
+    <h2>График платежей</h2>
+    <p id="tblInfo"></p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>№</th><th>Платёж</th><th>Основной долг</th><th>Проценты</th><th>Остаток долга</th></tr></thead>
+      <tbody id="rows"></tbody>
+      <tfoot><tr><td>Итого</td><td id="fT"></td><td id="fP"></td><td id="fI"></td><td></td></tr></tfoot>
+    </table>
+  </div>
+  <p class="foot">Чистый платёж = общая сумма выплат − сумма кредита. Доходность банка = чистый платёж ÷ сумма кредита. Расчёт ориентировочный и не является офертой.</p>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var nf=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});
+  var money=function(x){return nf.format(Math.round(x))+'\u00A0₸'};
+  var st={amt:null,rate:null,yrs:null,pti:null,inc:null,type:'a'};
+
+  function plural(n,a,b,c){var m=n%100,d=n%10;if(m>10&&m<20)return c;if(d===1)return a;if(d>1&&d<5)return b;return c}
+
+  function fmtInput(el){
+    var v=el.value,pos=el.selectionStart,cut=v.split(/[.,]/)[0],head=v.slice(0,pos).split(/[.,]/)[0];
+    var digits=cut.replace(/\D/g,'').slice(0,12),before=Math.min(head.replace(/\D/g,'').length,digits.length);
+    var out=digits?nf.format(+digits):'',cnt=0,i=0;
+    el.value=out;
+    if(before>0){for(i=0;i<out.length;i++){if(/\d/.test(out.charAt(i))&&++cnt===before){i++;break}}}
+    try{el.setSelectionRange(i,i)}catch(e){}
+  }
+  function parseNum(s){return parseFloat(String(s).replace(/\s/g,'').replace(',','.'))}
+
+  function build(){
+    var P=st.amt,n=st.yrs*12,r=st.rate/100/12,rows=[],bal=P,i,pay,intr,pr;
+    var ann=r===0?P/n:P*r/(1-Math.pow(1+r,-n));
+    for(i=1;i<=n;i++){
+      intr=bal*r;
+      if(st.type==='a'){pay=ann;pr=pay-intr}
+      else{pr=P/n;pay=pr+intr}
+      if(i===n)pr=bal;
+      bal=Math.max(0,bal-pr);
+      rows.push({i:i,pay:pr+intr,pr:pr,int:intr,bal:bal});
+    }
+    return rows;
+  }
+
+  function sums(type){
+    var P=st.amt,n=st.yrs*12,r=st.rate/1200,bal=P,tot=0,first=0,last=0,i,pr,it,pay,ann=r===0?P/n:P*r/(1-Math.pow(1+r,-n));
+    for(i=1;i<=n;i++){it=bal*r;pr=type==='a'?ann-it:P/n;if(i===n)pr=bal;bal=Math.max(0,bal-pr);pay=pr+it;tot+=pay;if(i===1)first=pay;last=pay}
+    return {first:first,last:last,tot:tot};
+  }
+  function cmp(){
+    var A=sums('a'),D=sums('d'),P=st.amt,mx=st.pti,sv=A.tot-D.tot,el=$('cmp');
+    var row=function(k,a,d){return `<tr><td>${k}</td><td>${a}</td><td>${d}</td></tr>`};
+    var h=`<h3>Сравнение способов</h3><table class='ct'><thead><tr><th></th><th>Аннуитетный</th><th>Дифференц.</th></tr></thead><tbody>`
+      +row('Первый платёж',money(A.first),money(D.first))
+      +row('Последний платёж',money(A.last),money(D.last))
+      +row('Переплата',money(A.tot-P),money(D.tot-P))
+      +row('Всего выплат',money(A.tot),money(D.tot));
+    if(mx>0)h+=row('Мин. доход в месяц',money(A.first/(mx/100)),money(D.first/(mx/100)));
+    h+=`</tbody></table>`;
+    if(sv>1){
+      h+=`<div class='save'><div class='k'>Экономия при дифференцированном</div><div class='v'>${money(sv)}</div><div class='k'>${p0(sv/(A.tot-P)*100)}\u00A0% от переплаты по аннуитету</div></div>`;
+      h+=`<p class='vd'><b>Что выгоднее:</b> по стоимости кредита — дифференцированный: банку выплачивается на ${money(sv)} меньше. Но первый платёж выше на ${money(D.first-A.first)}, поэтому нужен больший доход. Аннуитетный подходит, если важна низкая и ровная нагрузка на бюджет.</p>`;
+    }else h+=`<p class='vd'>При нулевой ставке разницы между способами нет.</p>`;
+    el.innerHTML=h;el.style.display='';
+  }
+  function charts(rows){
+    $('w1').style.display=$('w2').style.display='';
+    var n=rows.length,yrs=n/12,W=Math.max(280,Math.round($('c1').clientWidth)||600),H=200,L=54,R=8,T=10,B=22,w=W-L-R,h=H-T-B,P=st.amt,y,k;
+    var fmt=function(v){return v>=1e9?(v/1e9).toFixed(1).replace('.',',')+' млрд':v>=1e6?Math.round(v/1e6)+' млн':Math.round(v/1e3)+' тыс'};
+    var grid=function(m){var g='';[0,.5,1].forEach(function(f){var gy=T+h-f*h;g+=`<line x1='${L}' x2='${W-R}' y1='${gy}' y2='${gy}' style='stroke:var(--line)'/><text x='${L-6}' y='${gy+4}' text-anchor='end'>${fmt(m*f)}</text>`});return g};
+    var step=yrs>12?Math.ceil(yrs/6):1,xl='',d=`M${L} ${T}`;
+    for(y=0;y<=yrs;y+=step)xl+=`<text x='${(L+y/yrs*w).toFixed(1)}' y='${H-6}' text-anchor='middle'>${y}</text>`;
+    rows.forEach(function(r){d+=`L${(L+r.i/n*w).toFixed(1)} ${(T+h-r.bal/P*h).toFixed(1)}`});
+    $('c1').innerHTML=`<svg viewBox='0 0 ${W} ${H}' role='img' aria-label='Остаток долга по годам'>${grid(P)}${xl}<path d='${d}L${L+w} ${T+h}L${L} ${T+h}Z' style='fill:var(--accent);fill-opacity:.15'/><path d='${d}' style='fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round'/></svg>`;
+    var Y=[],mx=0;
+    for(k=0;k<yrs;k++){var pr=0,it=0;rows.slice(k*12,k*12+12).forEach(function(r){pr+=r.pr;it+=r.int});Y.push([pr,it]);mx=Math.max(mx,pr+it)}
+    var bw=w/yrs,b='',x2='';
+    Y.forEach(function(v,i){
+      var bx=(L+i*bw+bw*.12).toFixed(1),ww=(bw*.76).toFixed(1),hp=v[0]/mx*h,hi=v[1]/mx*h;
+      b+=`<rect x='${bx}' y='${(T+h-hp).toFixed(1)}' width='${ww}' height='${hp.toFixed(1)}' style='fill:var(--accent)'/><rect x='${bx}' y='${(T+h-hp-hi).toFixed(1)}' width='${ww}' height='${hi.toFixed(1)}' style='fill:var(--warn)'/>`;
+      if(yrs<=12||(i+1)%step===0)x2+=`<text x='${(L+(i+.5)*bw).toFixed(1)}' y='${H-6}' text-anchor='middle'>${i+1}</text>`;
+    });
+    $('c2').innerHTML=`<svg viewBox='0 0 ${W} ${H}' role='img' aria-label='Основной долг и проценты по годам'>${grid(mx)}${x2}${b}</svg>`;
+    $('w1').style.display=$('w2').style.display='';
+  }
+  var PDA=[[0,.01],[.1,.01],[.3,.02],[.4,.04],[.5,.08],[.6,.15],[.8,.3],[1,.5],[1.2,.7],[1.5,.9],[2,.99]];
+  function pdOf(x){for(var i=1;i<PDA.length;i++){if(x<=PDA[i][0]){var a=PDA[i-1],b=PDA[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}}return .99}
+  function p0(x){return x.toLocaleString('ru-RU',{maximumFractionDigits:1})}
+  function extra(pay){
+    var mx=st.pti,inc=st.inc,P=st.amt,req=0,T=function(id,t){$(id).textContent=t};
+    if(pay&&mx>0){req=pay/(mx/100);T('req',money(req));T('reqY',money(req*12));T('reqN','Платёж '+money(pay)+' ÷ '+p0(mx)+'\u00A0% допустимой доли')}
+    else{T('req','—');T('reqY','—');T('reqN',pay?'Введите допустимую долю платежа в доходе, %':'')}
+    var ok=$('ok'),lv=$('lvl');ok.textContent='';ok.style.color='';
+    if(pay&&inc>0){
+      var sh=pay/inc;T('sh',p0(sh*100)+'\u00A0%');
+      if(mx>0){if(inc>=req){ok.textContent='Доход достаточен, запас '+money(inc-req)+' в месяц';ok.style.color='var(--accent2)'}else{ok.textContent='Доход ниже требуемого на '+money(req-inc)+' в месяц';ok.style.color='#ff453a'}}
+      var pd=pdOf(sh),cum=1-Math.pow(1-pd,st.yrs);
+      if(sh>1){ok.textContent='Платёж превышает весь доход ('+p0(sh*100)+'\u00A0%)';ok.style.color='#ff453a'}
+      var lvl=pd<.03?['Низкий','var(--accent2)']:pd<.06?['Умеренный','var(--accent)']:pd<.12?['Повышенный','var(--warn)']:['Высокий','#ff453a'];
+      T('pd',p0(pd*100)+'\u00A0%');T('pdT',p0(cum*100)+'\u00A0%');T('ecl',money(cum*.45*P));
+      T('lvl',lvl[0]);lv.style.color=lvl[1];T('lvlN','Платёж занимает '+p0(sh*100)+'\u00A0% вашего дохода');
+    }else{
+      T('sh','—');['pd','pdT','ecl'].forEach(function(id){T(id,'—')});T('lvl','—');lv.style.color='';
+      T('lvlN',pay?'Введите ваш ежемесячный доход для оценки риска':'');
+    }
+  }
+  function empty(){
+    ['pay','total','net','ret'].forEach(function(id){$(id).textContent='—'});
+    $('payK').textContent='Ежемесячный платёж';$('payN').textContent='';
+    $('b1').style.width='0';$('b2').style.width='0';$('l1').textContent='';$('l2').textContent='';
+    $('mTxt').textContent='';$('tblInfo').textContent='Заполните все три поля';
+    $('rows').innerHTML='';$('fT').textContent='';$('fP').textContent='';$('fI').textContent='';
+    extra(null);
+    $('w1').style.display=$('w2').style.display='none';$('cmp').style.display='none';
+  }
+  function render(){
+    if(!(st.amt>0)||st.rate===null||!(st.yrs>0)){empty();return}
+    var rows=build(),n=rows.length,P=st.amt,total=0,tI=0,html='',k;
+    rows.forEach(function(x){total+=x.pay;tI+=x.int});
+    var net=total-P,ret=P>0?net/P*100:0;
+    var first=rows[0].pay,last=rows[n-1].pay;
+
+    if(st.type==='a'){$('payK').textContent='Ежемесячный платёж';$('pay').textContent=money(first);$('payN').textContent='Одинаковая сумма каждый месяц'}
+    else{$('payK').textContent='Первый ежемесячный платёж';$('pay').textContent=money(first);$('payN').textContent='Платёж снижается до '+money(last)+' к концу срока'}
+    $('total').textContent=money(total);
+    $('net').textContent=money(net);
+    $('ret').textContent=nfp(ret)+'\u00A0%';
+    var s1=total>0?P/total*100:100;
+    $('b1').style.width=s1+'%';$('b2').style.width=(100-s1)+'%';
+    $('l1').textContent=money(P);$('l2').textContent=money(tI);
+    $('mTxt').textContent=n+' '+plural(n,'платёж','платежа','платежей');
+    $('tblInfo').textContent=n+' '+plural(n,'платёж','платежа','платежей')+' · '+st.yrs+' '+plural(st.yrs,'год','года','лет');
+
+    for(k=0;k<n;k++){
+      var x=rows[k];
+      if(k%12===0)html+='<tr class="yr"><td colspan="5">Год '+(k/12+1)+'</td></tr>';
+      html+='<tr><td>'+x.i+'</td><td>'+nf.format(Math.round(x.pay))+'</td><td>'+nf.format(Math.round(x.pr))+'</td><td>'+nf.format(Math.round(x.int))+'</td><td>'+nf.format(Math.round(x.bal))+'</td></tr>';
+    }
+    $('rows').innerHTML=html;
+    $('fT').textContent=nf.format(Math.round(total));
+    $('fP').textContent=nf.format(Math.round(P));
+    $('fI').textContent=nf.format(Math.round(tI));
+    extra(first);
+    charts(rows);cmp();
+  }
+  function nfp(x){return x.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})}
+
+  function clamp(v,a,b){return Math.min(Math.max(v,a),b)}
+
+  $('amt').addEventListener('input',function(){fmtInput(this);var v=parseNum(this.value);st.amt=v>0?clamp(v,1000,10000000000):null;render()});
+  $('amt').addEventListener('blur',function(){if(st.amt)this.value=nf.format(st.amt)});
+  $('rate').addEventListener('input',function(){var v=parseNum(this.value);st.rate=v>=0?clamp(v,0,100):null;render()});
+  $('yrs').addEventListener('input',function(){var v=Math.round(parseNum(this.value));st.yrs=v>=1?clamp(v,1,50):null;render()});
+  $('pti').addEventListener('input',function(){var v=parseNum(this.value);st.pti=v>0?clamp(v,1,100):null;render()});
+  $('inc').addEventListener('input',function(){fmtInput(this);var v=parseNum(this.value);st.inc=v>0?v:null;render()});
+  $('inc').addEventListener('blur',function(){if(st.inc)this.value=nf.format(st.inc)});
+
+  document.querySelectorAll('#type button').forEach(function(b){
+    b.addEventListener('click',function(){
+      st.type=b.dataset.t;
+      document.querySelectorAll('#type button').forEach(function(o){o.setAttribute('aria-pressed',String(o===b))});
+      render();
+    });
+  });
+  var lw=window.innerWidth,rt;
+  window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(window.innerWidth!==lw){lw=window.innerWidth;render()}},200)});
+  render();
+})();
+</script>
+</body>
+</html>
